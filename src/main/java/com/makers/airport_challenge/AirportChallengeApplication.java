@@ -50,7 +50,7 @@ public class AirportChallengeApplication {
 
 		if(!randomWeather().equals("stormy") && isAtAirport(plane)) {
 			planes.remove(plane);
-			return "Take-off successful";
+			return "Take-off successful.";
 		} if (!isAtAirport(plane)){
 			return "Airplane is no longer at the airport. Please select another aircraft for take-off.";
 		}

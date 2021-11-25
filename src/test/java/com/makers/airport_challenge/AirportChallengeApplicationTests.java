@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest
 class AirportChallengeApplicationTests {
 
-    AirportChallengeApplication airport = new AirportChallengeApplication();
+    final AirportChallengeApplication airport = Mockito.spy(new AirportChallengeApplication());
 
 //	As an air traffic controller
 //	So I can get passengers to a destination
@@ -21,8 +21,9 @@ class AirportChallengeApplicationTests {
 
     @Test
     public void canLandPlane() {
-        airport.landPlane("First Plane");
-        assertThat(airport.isAtAirport("First Plane"));
+        //can land due to good weather, max capacity has not been reached & plane is not already in the airport
+        Mockito.when(airport.randomWeather()).thenReturn("sunny");
+        Assertions.assertEquals("Landing successful.", airport.landPlane("Skippy"));
         Assertions.assertEquals(1, airport.planes.size());
     }
 
@@ -33,8 +34,11 @@ class AirportChallengeApplicationTests {
 
     @Test
     void canTakeOff(){
-        airport.landPlane("Plane Two");
-        airport.takeOff("Plane Two");
+
+        //Take-off approved due to good weather and the plane is at the airport
+        Mockito.when(airport.randomWeather()).thenReturn("overcast");
+        Assertions.assertEquals("Landing successful.",airport.landPlane("Plane Two"));
+        Assertions.assertEquals("Take-off successful.",airport.takeOff("Plane Two"));
         assertThat(!airport.isAtAirport("Plane Two"));
     }
 
@@ -45,11 +49,6 @@ class AirportChallengeApplicationTests {
 
     @Test
     void canPreventLanding(){
-        final AirportChallengeApplication airport = Mockito.spy(new AirportChallengeApplication());
-
-        //can land due to good weather, max capacity has not been reached & plane is not already in the airport
-        Mockito.when(airport.randomWeather()).thenReturn("overcast");
-        Assertions.assertEquals("Landing successful.", airport.landPlane("Skippy"));
 
         //can't land a particular plane because it is already at the Airport
         Mockito.when(airport.randomWeather()).thenReturn("windy");
@@ -73,8 +72,6 @@ class AirportChallengeApplicationTests {
         airport.takeOff("Dusty");
         Mockito.when(airport.randomWeather()).thenReturn("stormy");
         Assertions.assertEquals("Cannot land plane due to stormy weather, await further instructions.", airport.landPlane("Leadbottom"));
-
-
     }
 
 
@@ -85,14 +82,12 @@ class AirportChallengeApplicationTests {
     @Test
     void canPreventTakeOff(){
 
-        final AirportChallengeApplication airport = Mockito.spy(new AirportChallengeApplication());
-
-        //prevents take-off when stormy
+        //Take-off blocked during stormy weather
         airport.landPlane("Plane 3");
         Mockito.when(airport.randomWeather()).thenReturn("stormy");
         Assertions.assertEquals("Take-off blocked due to stormy weather, please wait for further updates.", airport.takeOff("Plane 3"));
 
-        //prevents take-off is the plane is not at the airport
+        //Take-off blocked if the plane is not at the airport
         Mockito.when(airport.randomWeather()).thenReturn("windy");
         Assertions.assertEquals("Airplane is no longer at the airport. Please select another aircraft for take-off.", airport.takeOff("Rochelle"));
     }
